@@ -164,7 +164,7 @@
       <div class="chart-scroll" style="text-align:center;">
         <canvas id="adjustPreviewCanvas"></canvas>
       </div>
-      <p class="bg-remove-hint" id="bgRemoveHint">Tap the preview to remove a background colour (magic-wand style).</p>
+      <p class="bg-remove-hint" id="bgRemoveHint">Tap the preview to remove a background colour (magic-wand style). Tap other spots to remove more — each tap adds a region, and taps stack until you reset.</p>
     </div>
     <div class="card">
       <h2>Adjustments</h2>
@@ -205,7 +205,7 @@
       <div class="field">
         <label for="colorCountSlider">Number of colours</label>
         <div class="row-with-value">
-          <input type="range" id="colorCountSlider" min="4" max="30" value="12" />
+          <input type="range" id="colorCountSlider" min="4" max="40" value="12" />
           <output id="colorCountValue">12</output>
         </div>
       </div>
@@ -215,16 +215,7 @@
           <option value="median-cut">Median-cut (default)</option>
           <option value="k-means">K-means</option>
         </select>
-      </div>
-      <div class="field">
-        <label class="toggle-row">
-          <span>Floyd–Steinberg dithering</span>
-          <span class="switch">
-            <input type="checkbox" id="ditherToggle" />
-            <span class="track"></span>
-            <span class="thumb"></span>
-          </span>
-        </label>
+        <p class="hint" style="margin:8px 0 0;">Photos usually read better with more colours than a hand-drawn design — try 16–25 for busy or gradient-heavy photos.</p>
       </div>
     </div>
   </section>

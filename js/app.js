@@ -1,6 +1,6 @@
 import { loadImageFromFile, imageToCanvas, cropAndResample, constrainAspect, applyBrightnessContrast, applyEdgeEnhancement, removeBackgroundByClick, getImageData, putImageData } from './imageProcessing.js';
 import { AIDA_COUNTS, UNITS, PRESETS, sizeToGrid, gridToSize, formatLength, validateGrid, inchesToCm, cmToInches } from './sizing.js';
-import { buildPattern, buildLegend } from './pattern.js';
+import { buildPattern, buildLegend, applyBrandSnap } from './pattern.js';
 import { renderColorChart, renderSymbolChart, renderLegendCanvas, canvasToPngBlob } from './render.js';
 import { canvasesToPdf } from './pdfExport.js';
 import { loadSettings, saveSettings } from './state.js';
@@ -463,7 +463,6 @@ const contrastSlider = $('contrastSlider');
 const brightnessValue = $('brightnessValue');
 const contrastValue = $('contrastValue');
 const edgeToggle = $('edgeToggle');
-const ditherToggle = $('ditherToggle');
 const colorCountSlider = $('colorCountSlider');
 const colorCountValue = $('colorCountValue');
 const algorithmSelect = $('algorithmSelect');
@@ -523,7 +522,7 @@ adjustCanvas.addEventListener('click', (e) => {
   const scaleY = adjustCanvas.height / rect.height;
   const x = Math.round((e.clientX - rect.left) * scaleX);
   const y = Math.round((e.clientY - rect.top) * scaleY);
-  state.bgClicks.push({ x, y, tolerance: 32 });
+  state.bgClicks.push({ x, y, tolerance: 15 });
   bgRemovedStatus.textContent = `${state.bgClicks.length} region${state.bgClicks.length > 1 ? 's' : ''} removed`;
   recomputeAdjustedPreview();
 });
@@ -541,10 +540,6 @@ colorCountSlider.addEventListener('input', () => {
 });
 algorithmSelect.addEventListener('change', () => {
   settings.algorithm = algorithmSelect.value;
-  saveSettings(settings);
-});
-ditherToggle.addEventListener('change', () => {
-  settings.dither = ditherToggle.checked;
   saveSettings(settings);
 });
 
@@ -576,7 +571,9 @@ brandSelect.addEventListener('change', () => {
   saveSettings(settings);
   updateBrandNote();
   if (state.pattern) {
+    applyBrandSnap(state.pattern, settings.brand);
     state.legend = buildLegend(state.pattern, settings.brand);
+    renderChart();
     renderLegend();
   }
 });
@@ -600,7 +597,8 @@ function generatePattern() {
   setTimeout(() => {
     const gridCanvas = cropAndResample(state.adjustedCanvas, { x: 0, y: 0, w: state.adjustedCanvas.width, h: state.adjustedCanvas.height }, stitchesW, stitchesH);
     const gridData = getImageData(gridCanvas);
-    state.pattern = buildPattern(gridData, settings.colorCount, settings.algorithm, settings.dither);
+    state.pattern = buildPattern(gridData, settings.colorCount, settings.algorithm);
+    applyBrandSnap(state.pattern, settings.brand);
     state.legend = buildLegend(state.pattern, settings.brand);
     state.savedPatternId = null;
 
@@ -742,7 +740,6 @@ function initFromSettings() {
   colorCountSlider.value = settings.colorCount;
   colorCountValue.textContent = settings.colorCount;
   algorithmSelect.value = settings.algorithm;
-  ditherToggle.checked = settings.dither;
   brandSelect.value = settings.brand;
 }
 
