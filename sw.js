@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stitchcraft-v2';
+const CACHE_NAME = 'stitchcraft-v3';
 const APP_SHELL = [
   './',
   './index.html',
@@ -11,6 +11,7 @@ const APP_SHELL = [
   './js/db.js',
   './js/patternIO.js',
   './js/exportUtils.js',
+  './js/designer.js',
   './js/colorMath.js',
   './js/threadData.js',
   './js/crosswalk.js',

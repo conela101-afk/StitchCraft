@@ -8,7 +8,7 @@ import { renderColorChart, renderSymbolChart, renderLegendCanvas, canvasToPngBlo
 import { canvasesToPdf } from '../pdfExport.js';
 import { buildLegend } from '../pattern.js';
 import { exportPatternJSON, importPatternJSON } from '../patternIO.js';
-import { composeTitledPage, downloadBlob } from '../exportUtils.js';
+import { composeTitledPage, downloadBlob, slugify } from '../exportUtils.js';
 import { navigate } from '../router.js';
 import { showToast } from '../toast.js';
 import { BRANDS } from '../threadData.js';
@@ -22,10 +22,6 @@ const importInput = document.getElementById('importPatternInput');
 let openDetailId = null;
 
 const THUMB_MAX_PX = 140;
-
-function slug(name) {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'pattern';
-}
 
 export async function renderLibrary() {
   const patterns = await listPatterns();
@@ -107,7 +103,7 @@ async function duplicatePattern(pattern) {
 }
 
 function exportJson(pattern) {
-  downloadBlob(exportPatternJSON(pattern), `${slug(pattern.name)}.json`);
+  downloadBlob(exportPatternJSON(pattern), `${slugify(pattern.name)}.json`);
 }
 
 async function removePattern(id) {
@@ -185,7 +181,7 @@ async function renderDetail(id) {
   actions.appendChild(
     secondaryBtn('Download PNG', async () => {
       const blob = await canvasToPngBlob(renderSymbolChart(pattern, 24));
-      downloadBlob(blob, `${slug(pattern.name)}.png`);
+      downloadBlob(blob, `${slugify(pattern.name)}.png`);
     })
   );
   actions.appendChild(
@@ -201,7 +197,7 @@ async function renderDetail(id) {
       };
       const page2 = renderLegendCanvas(legend, meta, brandKey);
       const blob = await canvasesToPdf([page1, page2], { pageWidthIn: 8.5, pageHeightIn: 11 });
-      downloadBlob(blob, `${slug(pattern.name)}.pdf`);
+      downloadBlob(blob, `${slugify(pattern.name)}.pdf`);
     })
   );
   actions.appendChild(secondaryBtn('Export .json', () => exportJson(pattern)));

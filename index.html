@@ -302,9 +302,131 @@
 
   <!-- DESIGNER -->
   <section class="view" id="view-designer">
-    <div class="card">
+    <div class="card" id="designerStartCard">
       <h2>Pattern Designer</h2>
-      <p class="hint">Hand-draw a pattern or edit a saved one, stitch by stitch. Coming in a future update.</p>
+      <p class="hint">Hand-draw a pattern from scratch, or open a saved one to keep editing.</p>
+      <div class="grid-2">
+        <div class="field">
+          <label for="designerNewW">Width (stitches)</label>
+          <input type="number" id="designerNewW" min="1" max="400" step="1" value="30" />
+        </div>
+        <div class="field">
+          <label for="designerNewH">Height (stitches)</label>
+          <input type="number" id="designerNewH" min="1" max="400" step="1" value="30" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="designerAidaSelect">Aida count</label>
+        <select id="designerAidaSelect">
+          <option value="11">11 count</option>
+          <option value="14" selected>14 count</option>
+          <option value="16">16 count</option>
+          <option value="18">18 count</option>
+          <option value="22">22 count</option>
+        </select>
+      </div>
+      <div class="export-row">
+        <button class="btn btn-primary" id="designerNewBtn">New blank pattern</button>
+      </div>
+      <div class="field" style="margin-top:14px;">
+        <label for="designerOpenSelect">Open a saved pattern</label>
+        <select id="designerOpenSelect">
+          <option value="">Choose a saved pattern…</option>
+        </select>
+      </div>
+      <div class="export-row">
+        <button class="btn btn-secondary" id="designerOpenBtn">Open</button>
+      </div>
+    </div>
+
+    <div id="designerWorkspace" hidden>
+      <div class="card">
+        <div class="stat-strip" id="designerStats"></div>
+        <div class="export-row">
+          <button class="btn btn-ghost" id="designerBackBtn">← New / open a different pattern</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Tools</h2>
+        <div class="status-choices" id="designerTools">
+          <button data-tool="pencil" class="active">Pencil</button>
+          <button data-tool="line">Line</button>
+          <button data-tool="rect">Rectangle</button>
+          <button data-tool="fill">Fill</button>
+          <button data-tool="eyedropper">Eyedropper</button>
+          <button data-tool="eraser">Eraser</button>
+        </div>
+        <div class="export-row">
+          <button class="btn btn-secondary" id="designerUndoBtn" disabled>Undo</button>
+          <button class="btn btn-secondary" id="designerRedoBtn" disabled>Redo</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Chart</h2>
+        <div class="chart-toggle">
+          <button data-view="color" class="active" id="designerViewColor">Colour</button>
+          <button data-view="symbol" id="designerViewSymbol">Symbols (B&amp;W)</button>
+        </div>
+        <div class="tracker-chart-wrap" id="designerCanvasWrap"></div>
+        <p class="tracker-hint">Drag to draw. Line/Rectangle preview as you drag, and commit when you release.</p>
+      </div>
+
+      <div class="card">
+        <h2>Palette</h2>
+        <div class="field">
+          <label for="designerBrandSelect">Thread brand</label>
+          <select id="designerBrandSelect">
+            <option value="DMC">DMC</option>
+            <option value="Anchor">Anchor</option>
+            <option value="Madeira">Madeira</option>
+            <option value="Sullivans">Sullivans</option>
+          </select>
+        </div>
+        <div class="field">
+          <input type="text" id="designerSwatchFilter" placeholder="Search by code or name…" />
+        </div>
+        <div class="hint" style="margin:0 0 6px;">In pattern</div>
+        <div class="swatch-strip" id="designerPaletteStrip"></div>
+        <div class="hint" style="margin:10px 0 6px;">Brand colours — tap to add &amp; select</div>
+        <div class="swatch-strip swatch-strip-scroll" id="designerBrandStrip"></div>
+      </div>
+
+      <div class="card">
+        <h2>Resize canvas</h2>
+        <p class="hint">Anchored top-left; stitches outside the new size are trimmed.</p>
+        <div class="grid-2">
+          <div class="field">
+            <label for="designerResizeW">Width</label>
+            <input type="number" id="designerResizeW" min="1" max="400" step="1" />
+          </div>
+          <div class="field">
+            <label for="designerResizeH">Height</label>
+            <input type="number" id="designerResizeH" min="1" max="400" step="1" />
+          </div>
+        </div>
+        <div class="export-row">
+          <button class="btn btn-secondary" id="designerResizeBtn">Resize</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Save &amp; export</h2>
+        <div class="field">
+          <label for="designerNameInput">Name</label>
+          <input type="text" id="designerNameInput" value="Untitled design" />
+        </div>
+        <div class="export-row">
+          <button class="btn btn-primary" id="designerSaveBtn">Save to Library</button>
+          <button class="btn btn-secondary" id="designerStartProjectBtn">Start a project from this pattern</button>
+        </div>
+        <div class="export-row">
+          <button class="btn btn-secondary" id="designerExportPngBtn">Download PNG</button>
+          <button class="btn btn-secondary" id="designerExportPdfBtn">Download PDF</button>
+          <button class="btn btn-secondary" id="designerExportJsonBtn">Export pattern (.json)</button>
+        </div>
+      </div>
     </div>
   </section>
 

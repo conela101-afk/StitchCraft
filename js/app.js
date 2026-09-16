@@ -498,7 +498,7 @@ const brandNote = $('brandNote');
 const chartCanvas = $('chartCanvas');
 const legendTable = $('legendTable');
 const patternStats = $('patternStats');
-const chartToggleBtns = document.querySelectorAll('.chart-toggle button');
+const chartToggleBtns = document.querySelectorAll('#step-pattern .chart-toggle button');
 
 chartToggleBtns.forEach((btn) =>
   btn.addEventListener('click', () => {

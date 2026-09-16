@@ -16,6 +16,10 @@ export function composeTitledPage(chart, title) {
   return canvas;
 }
 
+export function slugify(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'pattern';
+}
+
 export function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
