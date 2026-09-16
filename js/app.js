@@ -6,6 +6,8 @@ import { canvasesToPdf } from './pdfExport.js';
 import { loadSettings, saveSettings } from './state.js';
 import { BRANDS, BRAND_NAMES } from './threadData.js';
 import { rgbToHex } from './colorMath.js';
+import { savePattern } from './db.js';
+import { exportPatternJSON } from './patternIO.js';
 
 // ---------------------------------------------------------------------------
 // State
@@ -585,6 +587,41 @@ function renderLegend() {
     )
     .join('');
 }
+
+$('saveToLibraryBtn').addEventListener('click', async () => {
+  if (!state.pattern) return;
+  try {
+    await savePattern({
+      name: `Pattern ${new Date().toLocaleDateString()}`,
+      width: state.pattern.width,
+      height: state.pattern.height,
+      aidaCount: settings.aidaCount,
+      indices: state.pattern.indices,
+      colors: state.pattern.colors,
+      brand: settings.brand,
+      source: 'photo',
+    });
+    showToast('Saved to library.');
+  } catch (err) {
+    console.error(err);
+    showToast('Could not save — storage may be unavailable.');
+  }
+});
+
+$('exportJsonBtn').addEventListener('click', () => {
+  if (!state.pattern) return;
+  const blob = exportPatternJSON({
+    name: `Pattern ${new Date().toLocaleDateString()}`,
+    width: state.pattern.width,
+    height: state.pattern.height,
+    aidaCount: settings.aidaCount,
+    indices: state.pattern.indices,
+    colors: state.pattern.colors,
+    brand: settings.brand,
+    source: 'photo',
+  });
+  downloadBlob(blob, 'stitchcraft-pattern.json');
+});
 
 $('exportPngBtn').addEventListener('click', async () => {
   if (!state.pattern) return;
