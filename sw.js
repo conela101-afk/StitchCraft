@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stitchcraft-v3';
+const CACHE_NAME = 'stitchcraft-v4';
 const APP_SHELL = [
   './',
   './index.html',
@@ -10,6 +10,7 @@ const APP_SHELL = [
   './js/toast.js',
   './js/db.js',
   './js/patternIO.js',
+  './js/oxsIO.js',
   './js/exportUtils.js',
   './js/designer.js',
   './js/colorMath.js',

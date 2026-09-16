@@ -8,6 +8,7 @@ import { renderColorChart, renderSymbolChart, renderLegendCanvas, canvasToPngBlo
 import { canvasesToPdf } from '../pdfExport.js';
 import { buildLegend } from '../pattern.js';
 import { exportPatternJSON, importPatternJSON } from '../patternIO.js';
+import { exportPatternOXS, importPatternOXS } from '../oxsIO.js';
 import { composeTitledPage, downloadBlob, slugify } from '../exportUtils.js';
 import { navigate } from '../router.js';
 import { showToast } from '../toast.js';
@@ -18,6 +19,8 @@ const emptyEl = document.getElementById('libraryEmpty');
 const detailEl = document.getElementById('libraryDetail');
 const importBtn = document.getElementById('importPatternBtn');
 const importInput = document.getElementById('importPatternInput');
+const importOxsBtn = document.getElementById('importOxsBtn');
+const importOxsInput = document.getElementById('importOxsInput');
 
 let openDetailId = null;
 
@@ -201,6 +204,7 @@ async function renderDetail(id) {
     })
   );
   actions.appendChild(secondaryBtn('Export .json', () => exportJson(pattern)));
+  actions.appendChild(secondaryBtn('Export .oxs', () => downloadBlob(exportPatternOXS(pattern), `${slugify(pattern.name)}.oxs`)));
   panel.appendChild(actions);
 
   detailEl.appendChild(panel);
@@ -219,5 +223,21 @@ importInput.addEventListener('change', async () => {
     showToast(err.message || 'Could not import that pattern.');
   } finally {
     importInput.value = '';
+  }
+});
+
+importOxsBtn.addEventListener('click', () => importOxsInput.click());
+importOxsInput.addEventListener('change', async () => {
+  const file = importOxsInput.files[0];
+  if (!file) return;
+  try {
+    const record = await importPatternOXS(file);
+    await savePattern(record);
+    showToast('Pattern imported.');
+    renderLibrary();
+  } catch (err) {
+    showToast(err.message || 'Could not import that .oxs file.');
+  } finally {
+    importOxsInput.value = '';
   }
 });

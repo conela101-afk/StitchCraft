@@ -8,6 +8,7 @@ import { BRANDS, BRAND_NAMES } from './threadData.js';
 import { rgbToHex } from './colorMath.js';
 import { savePattern, saveProject } from './db.js';
 import { exportPatternJSON } from './patternIO.js';
+import { exportPatternOXS } from './oxsIO.js';
 import { composeTitledPage, downloadBlob } from './exportUtils.js';
 import { navigate } from './router.js';
 import { showToast, hideToast } from './toast.js';
@@ -585,9 +586,8 @@ function renderLegend() {
     .join('');
 }
 
-async function ensurePatternSaved() {
-  if (state.savedPatternId) return state.savedPatternId;
-  const record = await savePattern({
+function wizardPatternRecord() {
+  return {
     name: `Pattern ${new Date().toLocaleDateString()}`,
     width: state.pattern.width,
     height: state.pattern.height,
@@ -596,7 +596,12 @@ async function ensurePatternSaved() {
     colors: state.pattern.colors,
     brand: settings.brand,
     source: 'photo',
-  });
+  };
+}
+
+async function ensurePatternSaved() {
+  if (state.savedPatternId) return state.savedPatternId;
+  const record = await savePattern(wizardPatternRecord());
   state.savedPatternId = record.id;
   return record.id;
 }
@@ -627,17 +632,12 @@ $('startProjectBtn').addEventListener('click', async () => {
 
 $('exportJsonBtn').addEventListener('click', () => {
   if (!state.pattern) return;
-  const blob = exportPatternJSON({
-    name: `Pattern ${new Date().toLocaleDateString()}`,
-    width: state.pattern.width,
-    height: state.pattern.height,
-    aidaCount: settings.aidaCount,
-    indices: state.pattern.indices,
-    colors: state.pattern.colors,
-    brand: settings.brand,
-    source: 'photo',
-  });
-  downloadBlob(blob, 'stitchcraft-pattern.json');
+  downloadBlob(exportPatternJSON(wizardPatternRecord()), 'stitchcraft-pattern.json');
+});
+
+$('exportOxsBtn').addEventListener('click', () => {
+  if (!state.pattern) return;
+  downloadBlob(exportPatternOXS(wizardPatternRecord()), 'stitchcraft-pattern.oxs');
 });
 
 $('exportPngBtn').addEventListener('click', async () => {

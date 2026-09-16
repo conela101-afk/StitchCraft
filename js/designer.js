@@ -11,6 +11,7 @@ import { BRANDS } from './threadData.js';
 import { rgbToHex } from './colorMath.js';
 import { savePattern, saveProject, listPatterns, getPattern } from './db.js';
 import { exportPatternJSON } from './patternIO.js';
+import { exportPatternOXS } from './oxsIO.js';
 import { composeTitledPage, downloadBlob, slugify } from './exportUtils.js';
 import { navigate, onRoute } from './router.js';
 import { showToast } from './toast.js';
@@ -45,6 +46,7 @@ const startProjectBtn = $('designerStartProjectBtn');
 const exportPngBtn = $('designerExportPngBtn');
 const exportPdfBtn = $('designerExportPdfBtn');
 const exportJsonBtn = $('designerExportJsonBtn');
+const exportOxsBtn = $('designerExportOxsBtn');
 const viewColorBtn = $('designerViewColor');
 const viewSymbolBtn = $('designerViewSymbol');
 
@@ -567,6 +569,10 @@ startProjectBtn.addEventListener('click', async () => {
 
 exportJsonBtn.addEventListener('click', () => {
   downloadBlob(exportPatternJSON(currentPatternForSave()), `${slugify(nameInput.value)}.json`);
+});
+
+exportOxsBtn.addEventListener('click', () => {
+  downloadBlob(exportPatternOXS(currentPatternForSave()), `${slugify(nameInput.value)}.oxs`);
 });
 
 exportPngBtn.addEventListener('click', async () => {
