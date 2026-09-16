@@ -143,3 +143,44 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
 export function canvasToPngBlob(canvas) {
   return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
 }
+
+// Progress-tracker chart: the normal symbol/colour chart with a translucent
+// checkmark overlay on cells the stitcher has marked as done.
+export function renderTrackerChart(pattern, stitchedCells, cellSize = 18, view = 'symbol') {
+  const canvas = view === 'color' ? renderColorChart(pattern, cellSize) : renderSymbolChart(pattern, cellSize);
+  const ctx = canvas.getContext('2d');
+  const { width } = pattern;
+  const stitched = stitchedCells instanceof Set ? stitchedCells : new Set(stitchedCells);
+
+  ctx.save();
+  for (const cell of stitched) {
+    const x = (cell % width) * cellSize;
+    const y = Math.floor(cell / width) * cellSize;
+    ctx.fillStyle = 'rgba(255,255,255,0.68)';
+    ctx.fillRect(x, y, cellSize, cellSize);
+    ctx.strokeStyle = '#2f6f6d';
+    ctx.lineWidth = Math.max(1.2, cellSize * 0.09);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x + cellSize * 0.22, y + cellSize * 0.55);
+    ctx.lineTo(x + cellSize * 0.42, y + cellSize * 0.75);
+    ctx.lineTo(x + cellSize * 0.8, y + cellSize * 0.25);
+    ctx.stroke();
+  }
+  ctx.restore();
+  return canvas;
+}
+
+/** Convert a click/tap event on a chart canvas into a {col,row,cell} grid position. */
+export function chartCellFromEvent(canvas, pattern, cellSize, event) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const px = (event.clientX - rect.left) * scaleX;
+  const py = (event.clientY - rect.top) * scaleY;
+  const col = Math.floor(px / cellSize);
+  const row = Math.floor(py / cellSize);
+  if (col < 0 || col >= pattern.width || row < 0 || row >= pattern.height) return null;
+  return { col, row, cell: row * pattern.width + col };
+}

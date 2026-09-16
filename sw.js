@@ -1,10 +1,16 @@
-const CACHE_NAME = 'stitchcraft-v1';
+const CACHE_NAME = 'stitchcraft-v2';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.json',
   './css/styles.css',
   './js/app.js',
+  './js/main.js',
+  './js/router.js',
+  './js/toast.js',
+  './js/db.js',
+  './js/patternIO.js',
+  './js/exportUtils.js',
   './js/colorMath.js',
   './js/threadData.js',
   './js/crosswalk.js',
@@ -15,6 +21,8 @@ const APP_SHELL = [
   './js/render.js',
   './js/pdfExport.js',
   './js/state.js',
+  './js/views/library.js',
+  './js/views/projects.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',

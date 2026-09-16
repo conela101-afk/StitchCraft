@@ -18,6 +18,34 @@
     <h1>🧵 StitchCraft</h1>
     <button id="installBtn" class="install-btn" hidden>Install app</button>
   </div>
+  <nav class="main-nav" id="mainNav">
+    <a href="#/home" data-route="home">Home</a>
+    <a href="#/new-pattern" data-route="new-pattern">New Pattern</a>
+    <a href="#/library" data-route="library">Library</a>
+    <a href="#/designer" data-route="designer">Designer</a>
+    <a href="#/projects" data-route="projects">Projects</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- HOME -->
+  <section class="view" id="view-home">
+    <div class="card">
+      <h2>Welcome back</h2>
+      <p class="hint">Turn a photo into a cross-stitch pattern, design one by hand, or pick up where you left off.</p>
+      <div class="home-actions">
+        <a class="btn btn-primary btn-block" href="#/new-pattern">Start a new pattern from a photo</a>
+        <a class="btn btn-secondary btn-block" href="#/designer">Design a pattern by hand</a>
+        <a class="btn btn-secondary btn-block" href="#/library">Browse your pattern library</a>
+        <a class="btn btn-secondary btn-block" href="#/projects">View your stitching projects</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEW PATTERN (5-step wizard) -->
+  <section class="view" id="view-new-pattern">
+
   <nav class="steps-nav" id="stepsNav">
     <button data-step="upload" class="active">1 · Upload</button>
     <button data-step="size" disabled>2 · Size</button>
@@ -25,9 +53,6 @@
     <button data-step="adjust" disabled>4 · Adjust</button>
     <button data-step="pattern" disabled>5 · Pattern</button>
   </nav>
-</header>
-
-<main>
 
   <!-- STEP 1: UPLOAD -->
   <section class="step active" id="step-upload">
@@ -233,9 +258,10 @@
     </div>
 
     <div class="card">
-      <h2>Save</h2>
+      <h2>Save &amp; track</h2>
       <div class="export-row">
         <button class="btn btn-primary" id="saveToLibraryBtn">Save to Library</button>
+        <button class="btn btn-secondary" id="startProjectBtn">Start a project from this pattern</button>
       </div>
     </div>
 
@@ -249,15 +275,59 @@
     </div>
   </section>
 
-</main>
+  <div class="wizard-footer" id="wizardFooter">
+    <button class="btn btn-ghost" id="backBtn" hidden>Back</button>
+    <button class="btn btn-primary btn-block" id="nextBtn">Choose a photo to begin</button>
+  </div>
 
-<div class="wizard-footer">
-  <button class="btn btn-ghost" id="backBtn" hidden>Back</button>
-  <button class="btn btn-primary btn-block" id="nextBtn">Choose a photo to begin</button>
-</div>
+  </section>
+  <!-- /NEW PATTERN -->
+
+  <!-- LIBRARY -->
+  <section class="view" id="view-library">
+    <div class="card">
+      <h2>Pattern library</h2>
+      <p class="hint">Patterns you've saved from the wizard, Designer, or imported as JSON files.</p>
+      <div class="export-row">
+        <button class="btn btn-secondary" id="importPatternBtn">Import pattern (.json)</button>
+        <input type="file" id="importPatternInput" accept="application/json" hidden />
+      </div>
+    </div>
+    <div id="libraryEmpty" class="card" hidden>
+      <p class="hint" style="margin:0;">No saved patterns yet. Generate one from a photo, design one by hand, or import a .json pattern file.</p>
+    </div>
+    <div class="pattern-grid" id="libraryGrid"></div>
+    <div id="libraryDetail"></div>
+  </section>
+
+  <!-- DESIGNER -->
+  <section class="view" id="view-designer">
+    <div class="card">
+      <h2>Pattern Designer</h2>
+      <p class="hint">Hand-draw a pattern or edit a saved one, stitch by stitch. Coming in a future update.</p>
+    </div>
+  </section>
+
+  <!-- PROJECTS (WIP/FO tracker) -->
+  <section class="view" id="view-projects">
+    <div id="projectsListPanel">
+      <div class="card">
+        <h2>Your projects</h2>
+        <p class="hint">Track stash, works-in-progress and finished objects. Open a saved pattern from the Library to start one.</p>
+      </div>
+      <div id="projectsEmpty" class="card" hidden>
+        <p class="hint" style="margin:0;">No projects yet. Save a pattern, then choose "Start a project from this pattern."</p>
+      </div>
+      <div id="projectGroups"></div>
+    </div>
+    <div id="projectDetailPanel" hidden></div>
+  </section>
+
+</main>
 
 <div id="toast" class="toast" hidden></div>
 
 <script type="module" src="js/app.js"></script>
+<script type="module" src="js/main.js"></script>
 </body>
 </html>
