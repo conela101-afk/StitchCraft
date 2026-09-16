@@ -18,6 +18,34 @@
     <h1>🧵 StitchCraft</h1>
     <button id="installBtn" class="install-btn" hidden>Install app</button>
   </div>
+  <nav class="main-nav" id="mainNav">
+    <a href="#/home" data-route="home">Home</a>
+    <a href="#/new-pattern" data-route="new-pattern">New Pattern</a>
+    <a href="#/library" data-route="library">Library</a>
+    <a href="#/designer" data-route="designer">Designer</a>
+    <a href="#/projects" data-route="projects">Projects</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- HOME -->
+  <section class="view" id="view-home">
+    <div class="card">
+      <h2>Welcome back</h2>
+      <p class="hint">Turn a photo into a cross-stitch pattern, design one by hand, or pick up where you left off.</p>
+      <div class="home-actions">
+        <a class="btn btn-primary btn-block" href="#/new-pattern">Start a new pattern from a photo</a>
+        <a class="btn btn-secondary btn-block" href="#/designer">Design a pattern by hand</a>
+        <a class="btn btn-secondary btn-block" href="#/library">Browse your pattern library</a>
+        <a class="btn btn-secondary btn-block" href="#/projects">View your stitching projects</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEW PATTERN (5-step wizard) -->
+  <section class="view" id="view-new-pattern">
+
   <nav class="steps-nav" id="stepsNav">
     <button data-step="upload" class="active">1 · Upload</button>
     <button data-step="size" disabled>2 · Size</button>
@@ -25,23 +53,29 @@
     <button data-step="adjust" disabled>4 · Adjust</button>
     <button data-step="pattern" disabled>5 · Pattern</button>
   </nav>
-</header>
-
-<main>
 
   <!-- STEP 1: UPLOAD -->
   <section class="step active" id="step-upload">
     <div class="card">
-      <h2>Start with a photo</h2>
-      <p class="hint">Everything happens on your device — nothing is uploaded anywhere.</p>
+      <h2>Start with a photo or a printed chart</h2>
+      <p class="hint">Everything happens on your device — nothing is uploaded anywhere. Digitise a photo, or a PDF/scan of a printed chart.</p>
       <div class="upload-zone" id="uploadZone">
-        <p>Drag &amp; drop an image here</p>
+        <p>Drag &amp; drop an image or PDF here</p>
         <div class="upload-actions">
-          <button class="btn btn-primary" id="pickFileBtn">Choose photo</button>
+          <button class="btn btn-primary" id="pickFileBtn">Choose photo or PDF</button>
           <button class="btn btn-secondary" id="cameraBtn">Take photo</button>
         </div>
-        <input type="file" id="fileInput" accept="image/*" hidden />
+        <input type="file" id="fileInput" accept="image/*,application/pdf" hidden />
         <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden />
+      </div>
+      <div id="pdfPicker" hidden>
+        <p class="hint" style="margin:12px 0 6px;">Found these page images in your PDF — choose one to digitise:</p>
+        <div class="pattern-grid" id="pdfPickerGrid"></div>
+      </div>
+      <div id="pdfFallback" class="warning-box" hidden>
+        We couldn't find a scanned or exported page image inside that PDF. Most bought pattern PDFs are text/vector-drawn,
+        and StitchCraft can't reliably reconstruct a grid from those (that would need OCR and grid-detection, which is out
+        of scope here). Take a screenshot or photo of the rendered chart page instead, and upload that as a photo.
       </div>
     </div>
   </section>
@@ -233,23 +267,206 @@
     </div>
 
     <div class="card">
+      <h2>Save &amp; track</h2>
+      <div class="export-row">
+        <button class="btn btn-primary" id="saveToLibraryBtn">Save to Library</button>
+        <button class="btn btn-secondary" id="startProjectBtn">Start a project from this pattern</button>
+      </div>
+    </div>
+
+    <div class="card">
       <h2>Export</h2>
       <div class="export-row">
         <button class="btn btn-secondary" id="exportPngBtn">Download PNG</button>
         <button class="btn btn-secondary" id="exportPdfBtn">Download PDF</button>
+        <button class="btn btn-secondary" id="exportJsonBtn">Export pattern (.json)</button>
+        <button class="btn btn-secondary" id="exportOxsBtn">Export pattern (.oxs)</button>
       </div>
     </div>
   </section>
 
-</main>
+  <div class="wizard-footer" id="wizardFooter">
+    <button class="btn btn-ghost" id="backBtn" hidden>Back</button>
+    <button class="btn btn-primary btn-block" id="nextBtn">Choose a photo to begin</button>
+  </div>
 
-<div class="wizard-footer">
-  <button class="btn btn-ghost" id="backBtn" hidden>Back</button>
-  <button class="btn btn-primary btn-block" id="nextBtn">Choose a photo to begin</button>
-</div>
+  </section>
+  <!-- /NEW PATTERN -->
+
+  <!-- LIBRARY -->
+  <section class="view" id="view-library">
+    <div class="card">
+      <h2>Pattern library</h2>
+      <p class="hint">Patterns you've saved from the wizard, Designer, or imported as files.</p>
+      <div class="export-row">
+        <a class="btn btn-primary" href="#/new-pattern">Digitise a printed chart</a>
+      </div>
+      <p class="hint" style="margin-top:10px;">Upload a photo of a finished piece, or a scanned/exported PDF page — same tool either way.</p>
+      <div class="export-row">
+        <button class="btn btn-secondary" id="importPatternBtn">Import pattern (.json)</button>
+        <input type="file" id="importPatternInput" accept="application/json" hidden />
+        <button class="btn btn-secondary" id="importOxsBtn">Import pattern (.oxs)</button>
+        <input type="file" id="importOxsInput" accept=".oxs,application/xml,text/xml" hidden />
+      </div>
+    </div>
+    <div id="libraryEmpty" class="card" hidden>
+      <p class="hint" style="margin:0;">No saved patterns yet. Generate one from a photo, design one by hand, or import a .json pattern file.</p>
+    </div>
+    <div class="pattern-grid" id="libraryGrid"></div>
+    <div id="libraryDetail"></div>
+  </section>
+
+  <!-- DESIGNER -->
+  <section class="view" id="view-designer">
+    <div class="card" id="designerStartCard">
+      <h2>Pattern Designer</h2>
+      <p class="hint">Hand-draw a pattern from scratch, or open a saved one to keep editing.</p>
+      <div class="grid-2">
+        <div class="field">
+          <label for="designerNewW">Width (stitches)</label>
+          <input type="number" id="designerNewW" min="1" max="400" step="1" value="30" />
+        </div>
+        <div class="field">
+          <label for="designerNewH">Height (stitches)</label>
+          <input type="number" id="designerNewH" min="1" max="400" step="1" value="30" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="designerAidaSelect">Aida count</label>
+        <select id="designerAidaSelect">
+          <option value="11">11 count</option>
+          <option value="14" selected>14 count</option>
+          <option value="16">16 count</option>
+          <option value="18">18 count</option>
+          <option value="22">22 count</option>
+        </select>
+      </div>
+      <div class="export-row">
+        <button class="btn btn-primary" id="designerNewBtn">New blank pattern</button>
+      </div>
+      <div class="field" style="margin-top:14px;">
+        <label for="designerOpenSelect">Open a saved pattern</label>
+        <select id="designerOpenSelect">
+          <option value="">Choose a saved pattern…</option>
+        </select>
+      </div>
+      <div class="export-row">
+        <button class="btn btn-secondary" id="designerOpenBtn">Open</button>
+      </div>
+    </div>
+
+    <div id="designerWorkspace" hidden>
+      <div class="card">
+        <div class="stat-strip" id="designerStats"></div>
+        <div class="export-row">
+          <button class="btn btn-ghost" id="designerBackBtn">← New / open a different pattern</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Tools</h2>
+        <div class="status-choices" id="designerTools">
+          <button data-tool="pencil" class="active">Pencil</button>
+          <button data-tool="line">Line</button>
+          <button data-tool="rect">Rectangle</button>
+          <button data-tool="fill">Fill</button>
+          <button data-tool="eyedropper">Eyedropper</button>
+          <button data-tool="eraser">Eraser</button>
+        </div>
+        <div class="export-row">
+          <button class="btn btn-secondary" id="designerUndoBtn" disabled>Undo</button>
+          <button class="btn btn-secondary" id="designerRedoBtn" disabled>Redo</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Chart</h2>
+        <div class="chart-toggle">
+          <button data-view="color" class="active" id="designerViewColor">Colour</button>
+          <button data-view="symbol" id="designerViewSymbol">Symbols (B&amp;W)</button>
+        </div>
+        <div class="tracker-chart-wrap" id="designerCanvasWrap"></div>
+        <p class="tracker-hint">Drag to draw. Line/Rectangle preview as you drag, and commit when you release.</p>
+      </div>
+
+      <div class="card">
+        <h2>Palette</h2>
+        <div class="field">
+          <label for="designerBrandSelect">Thread brand</label>
+          <select id="designerBrandSelect">
+            <option value="DMC">DMC</option>
+            <option value="Anchor">Anchor</option>
+            <option value="Madeira">Madeira</option>
+            <option value="Sullivans">Sullivans</option>
+          </select>
+        </div>
+        <div class="field">
+          <input type="text" id="designerSwatchFilter" placeholder="Search by code or name…" />
+        </div>
+        <div class="hint" style="margin:0 0 6px;">In pattern</div>
+        <div class="swatch-strip" id="designerPaletteStrip"></div>
+        <div class="hint" style="margin:10px 0 6px;">Brand colours — tap to add &amp; select</div>
+        <div class="swatch-strip swatch-strip-scroll" id="designerBrandStrip"></div>
+      </div>
+
+      <div class="card">
+        <h2>Resize canvas</h2>
+        <p class="hint">Anchored top-left; stitches outside the new size are trimmed.</p>
+        <div class="grid-2">
+          <div class="field">
+            <label for="designerResizeW">Width</label>
+            <input type="number" id="designerResizeW" min="1" max="400" step="1" />
+          </div>
+          <div class="field">
+            <label for="designerResizeH">Height</label>
+            <input type="number" id="designerResizeH" min="1" max="400" step="1" />
+          </div>
+        </div>
+        <div class="export-row">
+          <button class="btn btn-secondary" id="designerResizeBtn">Resize</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Save &amp; export</h2>
+        <div class="field">
+          <label for="designerNameInput">Name</label>
+          <input type="text" id="designerNameInput" value="Untitled design" />
+        </div>
+        <div class="export-row">
+          <button class="btn btn-primary" id="designerSaveBtn">Save to Library</button>
+          <button class="btn btn-secondary" id="designerStartProjectBtn">Start a project from this pattern</button>
+        </div>
+        <div class="export-row">
+          <button class="btn btn-secondary" id="designerExportPngBtn">Download PNG</button>
+          <button class="btn btn-secondary" id="designerExportPdfBtn">Download PDF</button>
+          <button class="btn btn-secondary" id="designerExportJsonBtn">Export pattern (.json)</button>
+          <button class="btn btn-secondary" id="designerExportOxsBtn">Export pattern (.oxs)</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS (WIP/FO tracker) -->
+  <section class="view" id="view-projects">
+    <div id="projectsListPanel">
+      <div class="card">
+        <h2>Your projects</h2>
+        <p class="hint">Track stash, works-in-progress and finished objects. Open a saved pattern from the Library to start one.</p>
+      </div>
+      <div id="projectsEmpty" class="card" hidden>
+        <p class="hint" style="margin:0;">No projects yet. Save a pattern, then choose "Start a project from this pattern."</p>
+      </div>
+      <div id="projectGroups"></div>
+    </div>
+    <div id="projectDetailPanel" hidden></div>
+  </section>
+
+</main>
 
 <div id="toast" class="toast" hidden></div>
 
 <script type="module" src="js/app.js"></script>
+<script type="module" src="js/main.js"></script>
 </body>
 </html>

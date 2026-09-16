@@ -6,6 +6,13 @@ import { canvasesToPdf } from './pdfExport.js';
 import { loadSettings, saveSettings } from './state.js';
 import { BRANDS, BRAND_NAMES } from './threadData.js';
 import { rgbToHex } from './colorMath.js';
+import { savePattern, saveProject } from './db.js';
+import { exportPatternJSON } from './patternIO.js';
+import { exportPatternOXS } from './oxsIO.js';
+import { extractPdfImages } from './pdfDigitize.js';
+import { composeTitledPage, downloadBlob } from './exportUtils.js';
+import { navigate } from './router.js';
+import { showToast, hideToast } from './toast.js';
 
 // ---------------------------------------------------------------------------
 // State
@@ -26,6 +33,7 @@ const state = {
   pattern: null,
   legend: null,
   chartView: 'symbol',
+  savedPatternId: null,
 };
 
 // ---------------------------------------------------------------------------
@@ -36,14 +44,6 @@ const $ = (id) => document.getElementById(id);
 const stepsNav = $('stepsNav');
 const backBtn = $('backBtn');
 const nextBtn = $('nextBtn');
-const toastEl = $('toast');
-
-function showToast(msg, ms = 2200) {
-  toastEl.textContent = msg;
-  toastEl.hidden = false;
-  clearTimeout(showToast._t);
-  showToast._t = setTimeout(() => (toastEl.hidden = true), ms);
-}
 
 // ---------------------------------------------------------------------------
 // Step navigation
@@ -116,6 +116,9 @@ nextBtn.addEventListener('click', () => {
 const uploadZone = $('uploadZone');
 const fileInput = $('fileInput');
 const cameraInput = $('cameraInput');
+const pdfPicker = $('pdfPicker');
+const pdfPickerGrid = $('pdfPickerGrid');
+const pdfFallback = $('pdfFallback');
 
 $('pickFileBtn').addEventListener('click', () => fileInput.click());
 $('cameraBtn').addEventListener('click', () => cameraInput.click());
@@ -140,10 +143,22 @@ uploadZone.addEventListener('drop', (e) => {
 });
 
 async function handleFile(file) {
-  if (!file.type.startsWith('image/')) {
-    showToast('Please choose an image file.');
+  pdfPicker.hidden = true;
+  pdfFallback.hidden = true;
+  pdfPickerGrid.innerHTML = '';
+
+  if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+    await handlePdfFile(file);
     return;
   }
+  if (!file.type.startsWith('image/')) {
+    showToast('Please choose an image or PDF file.');
+    return;
+  }
+  await useImageFile(file);
+}
+
+async function useImageFile(file) {
   try {
     const img = await loadImageFromFile(file);
     state.originalCanvas = imageToCanvas(img, 1600);
@@ -153,6 +168,44 @@ async function handleFile(file) {
   } catch (err) {
     console.error(err);
     showToast('Could not load that image.');
+  }
+}
+
+async function handlePdfFile(file) {
+  showToast('Scanning PDF for page images…', 60000);
+  let images;
+  try {
+    images = await extractPdfImages(file);
+  } catch (err) {
+    console.error(err);
+    hideToast();
+    showToast(err.message || 'Could not read that PDF.');
+    return;
+  }
+  hideToast();
+
+  if (images.length === 0) {
+    pdfFallback.hidden = false;
+    return;
+  }
+  if (images.length === 1) {
+    await useImageFile(images[0]);
+    return;
+  }
+
+  pdfPicker.hidden = false;
+  for (const blob of images) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pattern-card';
+    const thumbWrap = document.createElement('div');
+    thumbWrap.className = 'thumb-wrap';
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(blob);
+    thumbWrap.appendChild(img);
+    btn.appendChild(thumbWrap);
+    btn.addEventListener('click', () => useImageFile(blob));
+    pdfPickerGrid.appendChild(btn);
   }
 }
 
@@ -500,7 +553,7 @@ const brandNote = $('brandNote');
 const chartCanvas = $('chartCanvas');
 const legendTable = $('legendTable');
 const patternStats = $('patternStats');
-const chartToggleBtns = document.querySelectorAll('.chart-toggle button');
+const chartToggleBtns = document.querySelectorAll('#step-pattern .chart-toggle button');
 
 chartToggleBtns.forEach((btn) =>
   btn.addEventListener('click', () => {
@@ -541,13 +594,14 @@ function generatePattern() {
     const gridData = getImageData(gridCanvas);
     state.pattern = buildPattern(gridData, settings.colorCount, settings.algorithm, settings.dither);
     state.legend = buildLegend(state.pattern, settings.brand);
+    state.savedPatternId = null;
 
     brandSelect.value = settings.brand;
     updateBrandNote();
     renderChart();
     renderLegend();
     renderStats(stitchesW, stitchesH);
-    toastEl.hidden = true;
+    hideToast();
   }, 30);
 }
 
@@ -586,6 +640,60 @@ function renderLegend() {
     .join('');
 }
 
+function wizardPatternRecord() {
+  return {
+    name: `Pattern ${new Date().toLocaleDateString()}`,
+    width: state.pattern.width,
+    height: state.pattern.height,
+    aidaCount: settings.aidaCount,
+    indices: state.pattern.indices,
+    colors: state.pattern.colors,
+    brand: settings.brand,
+    source: 'photo',
+  };
+}
+
+async function ensurePatternSaved() {
+  if (state.savedPatternId) return state.savedPatternId;
+  const record = await savePattern(wizardPatternRecord());
+  state.savedPatternId = record.id;
+  return record.id;
+}
+
+$('saveToLibraryBtn').addEventListener('click', async () => {
+  if (!state.pattern) return;
+  try {
+    await ensurePatternSaved();
+    showToast('Saved to library.');
+  } catch (err) {
+    console.error(err);
+    showToast('Could not save — storage may be unavailable.');
+  }
+});
+
+$('startProjectBtn').addEventListener('click', async () => {
+  if (!state.pattern) return;
+  try {
+    const patternId = await ensurePatternSaved();
+    const project = await saveProject({ patternId, status: 'wip', startDate: Date.now() });
+    showToast('Project started.');
+    navigate(`projects/${project.id}`);
+  } catch (err) {
+    console.error(err);
+    showToast('Could not start project — storage may be unavailable.');
+  }
+});
+
+$('exportJsonBtn').addEventListener('click', () => {
+  if (!state.pattern) return;
+  downloadBlob(exportPatternJSON(wizardPatternRecord()), 'stitchcraft-pattern.json');
+});
+
+$('exportOxsBtn').addEventListener('click', () => {
+  if (!state.pattern) return;
+  downloadBlob(exportPatternOXS(wizardPatternRecord()), 'stitchcraft-pattern.oxs');
+});
+
 $('exportPngBtn').addEventListener('click', async () => {
   if (!state.pattern) return;
   const canvas = state.chartView === 'symbol' ? renderSymbolChart(state.pattern, 24) : renderColorChart(state.pattern, 24);
@@ -613,35 +721,9 @@ $('exportPdfBtn').addEventListener('click', async () => {
     const blob = await canvasesToPdf([page1, page2], { pageWidthIn: 8.5, pageHeightIn: 11 });
     downloadBlob(blob, 'stitchcraft-pattern.pdf');
   } finally {
-    toastEl.hidden = true;
+    hideToast();
   }
 });
-
-function composeTitledPage(chart, title) {
-  const pad = 40;
-  const canvas = document.createElement('canvas');
-  canvas.width = chart.width + pad * 2;
-  canvas.height = chart.height + pad * 2 + 40;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#111111';
-  ctx.font = 'bold 22px sans-serif';
-  ctx.fillText(title, pad, 34);
-  ctx.drawImage(chart, pad, 60);
-  return canvas;
-}
-
-function downloadBlob(blob, filename) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 4000);
-}
 
 // ---------------------------------------------------------------------------
 // Init
