@@ -171,11 +171,17 @@ async function useImageFile(file) {
   }
 }
 
+const PDF_FALLBACK_MESSAGES = {
+  vector: 'This looks like a vector-drawn pattern (grid lines, symbols and a legend, not a scanned image) — there’s no reliable automatic way to convert that into stitches. Try photographing a printed copy instead, or hand-copy it in the Designer using the pattern’s own legend.',
+  'unsupported-filter': 'This PDF has an embedded page image, but in a format this app can’t decode (e.g. CCITT fax or JPEG2000). Try a photo or screenshot of the rendered page instead.',
+  unparseable: 'Couldn’t confidently read this PDF’s structure (it may use a newer/compressed PDF format this app doesn’t parse). Try a photo or screenshot of the rendered page instead.',
+};
+
 async function handlePdfFile(file) {
-  showToast('Scanning PDF for page images…', 60000);
-  let images;
+  showToast('Analysing PDF pages…', 60000);
+  let result;
   try {
-    images = await extractPdfImages(file);
+    result = await extractPdfImages(file);
   } catch (err) {
     console.error(err);
     hideToast();
@@ -184,7 +190,9 @@ async function handlePdfFile(file) {
   }
   hideToast();
 
+  const { images, reason } = result;
   if (images.length === 0) {
+    pdfFallback.textContent = PDF_FALLBACK_MESSAGES[reason] || PDF_FALLBACK_MESSAGES.unparseable;
     pdfFallback.hidden = false;
     return;
   }
