@@ -57,16 +57,25 @@
   <!-- STEP 1: UPLOAD -->
   <section class="step active" id="step-upload">
     <div class="card">
-      <h2>Start with a photo</h2>
-      <p class="hint">Everything happens on your device — nothing is uploaded anywhere.</p>
+      <h2>Start with a photo or a printed chart</h2>
+      <p class="hint">Everything happens on your device — nothing is uploaded anywhere. Digitise a photo, or a PDF/scan of a printed chart.</p>
       <div class="upload-zone" id="uploadZone">
-        <p>Drag &amp; drop an image here</p>
+        <p>Drag &amp; drop an image or PDF here</p>
         <div class="upload-actions">
-          <button class="btn btn-primary" id="pickFileBtn">Choose photo</button>
+          <button class="btn btn-primary" id="pickFileBtn">Choose photo or PDF</button>
           <button class="btn btn-secondary" id="cameraBtn">Take photo</button>
         </div>
-        <input type="file" id="fileInput" accept="image/*" hidden />
+        <input type="file" id="fileInput" accept="image/*,application/pdf" hidden />
         <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden />
+      </div>
+      <div id="pdfPicker" hidden>
+        <p class="hint" style="margin:12px 0 6px;">Found these page images in your PDF — choose one to digitise:</p>
+        <div class="pattern-grid" id="pdfPickerGrid"></div>
+      </div>
+      <div id="pdfFallback" class="warning-box" hidden>
+        We couldn't find a scanned or exported page image inside that PDF. Most bought pattern PDFs are text/vector-drawn,
+        and StitchCraft can't reliably reconstruct a grid from those (that would need OCR and grid-detection, which is out
+        of scope here). Take a screenshot or photo of the rendered chart page instead, and upload that as a photo.
       </div>
     </div>
   </section>
@@ -288,7 +297,11 @@
   <section class="view" id="view-library">
     <div class="card">
       <h2>Pattern library</h2>
-      <p class="hint">Patterns you've saved from the wizard, Designer, or imported as JSON files.</p>
+      <p class="hint">Patterns you've saved from the wizard, Designer, or imported as files.</p>
+      <div class="export-row">
+        <a class="btn btn-primary" href="#/new-pattern">Digitise a printed chart</a>
+      </div>
+      <p class="hint" style="margin-top:10px;">Upload a photo of a finished piece, or a scanned/exported PDF page — same tool either way.</p>
       <div class="export-row">
         <button class="btn btn-secondary" id="importPatternBtn">Import pattern (.json)</button>
         <input type="file" id="importPatternInput" accept="application/json" hidden />

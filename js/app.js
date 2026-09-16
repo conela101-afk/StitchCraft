@@ -9,6 +9,7 @@ import { rgbToHex } from './colorMath.js';
 import { savePattern, saveProject } from './db.js';
 import { exportPatternJSON } from './patternIO.js';
 import { exportPatternOXS } from './oxsIO.js';
+import { extractPdfImages } from './pdfDigitize.js';
 import { composeTitledPage, downloadBlob } from './exportUtils.js';
 import { navigate } from './router.js';
 import { showToast, hideToast } from './toast.js';
@@ -115,6 +116,9 @@ nextBtn.addEventListener('click', () => {
 const uploadZone = $('uploadZone');
 const fileInput = $('fileInput');
 const cameraInput = $('cameraInput');
+const pdfPicker = $('pdfPicker');
+const pdfPickerGrid = $('pdfPickerGrid');
+const pdfFallback = $('pdfFallback');
 
 $('pickFileBtn').addEventListener('click', () => fileInput.click());
 $('cameraBtn').addEventListener('click', () => cameraInput.click());
@@ -139,10 +143,22 @@ uploadZone.addEventListener('drop', (e) => {
 });
 
 async function handleFile(file) {
-  if (!file.type.startsWith('image/')) {
-    showToast('Please choose an image file.');
+  pdfPicker.hidden = true;
+  pdfFallback.hidden = true;
+  pdfPickerGrid.innerHTML = '';
+
+  if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+    await handlePdfFile(file);
     return;
   }
+  if (!file.type.startsWith('image/')) {
+    showToast('Please choose an image or PDF file.');
+    return;
+  }
+  await useImageFile(file);
+}
+
+async function useImageFile(file) {
   try {
     const img = await loadImageFromFile(file);
     state.originalCanvas = imageToCanvas(img, 1600);
@@ -152,6 +168,44 @@ async function handleFile(file) {
   } catch (err) {
     console.error(err);
     showToast('Could not load that image.');
+  }
+}
+
+async function handlePdfFile(file) {
+  showToast('Scanning PDF for page images…', 60000);
+  let images;
+  try {
+    images = await extractPdfImages(file);
+  } catch (err) {
+    console.error(err);
+    hideToast();
+    showToast(err.message || 'Could not read that PDF.');
+    return;
+  }
+  hideToast();
+
+  if (images.length === 0) {
+    pdfFallback.hidden = false;
+    return;
+  }
+  if (images.length === 1) {
+    await useImageFile(images[0]);
+    return;
+  }
+
+  pdfPicker.hidden = false;
+  for (const blob of images) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pattern-card';
+    const thumbWrap = document.createElement('div');
+    thumbWrap.className = 'thumb-wrap';
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(blob);
+    thumbWrap.appendChild(img);
+    btn.appendChild(thumbWrap);
+    btn.addEventListener('click', () => useImageFile(blob));
+    pdfPickerGrid.appendChild(btn);
   }
 }
 
