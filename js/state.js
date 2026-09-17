@@ -10,7 +10,6 @@ const DEFAULTS = {
   heightIn: 2,
   colorCount: 12,
   algorithm: 'median-cut',
-  dither: false,
 };
 
 export function loadSettings() {

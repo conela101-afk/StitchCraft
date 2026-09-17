@@ -21,14 +21,17 @@ export function symbolFor(index) {
 
 /**
  * @param {ImageData} imageData - already cropped/resampled to the stitch grid
- *   resolution (1 image pixel == 1 stitch).
+ *   resolution (1 image pixel == 1 stitch). Not dithered: error-diffusion at
+ *   1-pixel-per-stitch resolution pushes whole runs of similar-toned stitches
+ *   across a palette boundary once accumulated error tips them over, which
+ *   reads as stray off-hue blotches rather than a smooth blend — solid
+ *   quantized blocks read better at chart resolution anyway.
  * @param {number} colorCount
  * @param {'median-cut'|'k-means'} algorithm
- * @param {boolean} dither
  */
-export function buildPattern(imageData, colorCount, algorithm, dither) {
+export function buildPattern(imageData, colorCount, algorithm) {
   const palette = quantizePalette(imageData, colorCount, algorithm);
-  const { indices, width, height } = mapToPalette(imageData, palette, dither);
+  const { indices, width, height } = mapToPalette(imageData, palette);
 
   const counts = new Array(palette.length).fill(0);
   for (const idx of indices) {
@@ -38,11 +41,28 @@ export function buildPattern(imageData, colorCount, algorithm, dither) {
   const colors = palette.map((p, i) => ({
     index: i,
     rgb: p.rgb,
+    sourceRgb: p.rgb, // pristine quantized centroid — the anchor for re-snapping to a different brand later
     symbol: symbolFor(i),
     stitchCount: counts[i],
   })).filter((c) => c.stitchCount > 0);
 
   return { width, height, indices, colors };
+}
+
+/**
+ * Snap each palette entry's rgb to the nearest real swatch in `brandKey`, so
+ * the chart, PNG/PDF export and legend all show the actual thread colour the
+ * legend claims rather than the raw quantization centroid. Always re-snaps
+ * from the original quantized colour (not the currently-snapped one), so
+ * switching brands back and forth doesn't drift.
+ */
+export function applyBrandSnap(pattern, brandKey) {
+  pattern.colors = pattern.colors.map((c) => {
+    const anchor = c.sourceRgb || c.rgb;
+    const match = legendRowForBrand(anchor, brandKey);
+    return { ...c, rgb: match.rgb, sourceRgb: anchor };
+  });
+  return pattern;
 }
 
 /**
@@ -52,7 +72,7 @@ export function buildPattern(imageData, colorCount, algorithm, dither) {
 export function buildLegend(pattern, brandKey) {
   return pattern.colors
     .map((c) => {
-      const match = legendRowForBrand(c.rgb, brandKey);
+      const match = legendRowForBrand(c.sourceRgb || c.rgb, brandKey);
       return {
         ...c,
         threadCode: match.code,

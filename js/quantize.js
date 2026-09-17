@@ -1,6 +1,8 @@
-// Colour quantization: median-cut (default) and k-means (alternate), plus
-// optional Floyd-Steinberg dithering. Operates on Lab colour space for
-// perceptually even clustering; final nearest-colour lookups use CIEDE2000.
+// Colour quantization: median-cut (default) and k-means (alternate).
+// Operates on Lab colour space for perceptually even clustering; final
+// nearest-colour lookups use CIEDE2000. No dithering: at 1 pixel per stitch,
+// error diffusion doesn't blend — it just pushes runs of stitches across a
+// palette boundary once accumulated error tips them over.
 
 import { rgbToLab, labToRgb, ciede2000 } from './colorMath.js';
 
@@ -176,22 +178,14 @@ function nearestPaletteIndex(lab, palette) {
 
 /**
  * Map every pixel of imageData to the nearest colour in `palette`
- * (array of {rgb, lab}), optionally with Floyd-Steinberg error diffusion.
+ * (array of {rgb, lab}).
  * Returns { indices: Int32Array(width*height) (-1 = transparent/removed),
  *           width, height }.
  */
-export function mapToPalette(imageData, palette, dither = false) {
+export function mapToPalette(imageData, palette) {
   const { width, height, data } = imageData;
   const indices = new Int32Array(width * height).fill(-1);
   if (palette.length === 0) return { indices, width, height };
-
-  // Working RGB buffer as floats, for error diffusion.
-  const work = new Float32Array(width * height * 3);
-  for (let i = 0; i < width * height; i++) {
-    work[i * 3] = data[i * 4];
-    work[i * 3 + 1] = data[i * 4 + 1];
-    work[i * 3 + 2] = data[i * 4 + 2];
-  }
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -199,40 +193,11 @@ export function mapToPalette(imageData, palette, dither = false) {
       const alpha = data[i * 4 + 3];
       if (alpha < 16) continue; // transparent -> no stitch
 
-      const rgb = [
-        Math.max(0, Math.min(255, work[i * 3])),
-        Math.max(0, Math.min(255, work[i * 3 + 1])),
-        Math.max(0, Math.min(255, work[i * 3 + 2])),
-      ];
+      const rgb = [data[i * 4], data[i * 4 + 1], data[i * 4 + 2]];
       const lab = rgbToLab(rgb);
-      const idx = nearestPaletteIndex(lab, palette);
-      indices[i] = idx;
-
-      if (dither) {
-        const chosen = palette[idx].rgb;
-        const errR = rgb[0] - chosen[0];
-        const errG = rgb[1] - chosen[1];
-        const errB = rgb[2] - chosen[2];
-        diffuse(work, width, height, x, y, errR, errG, errB);
-      }
+      indices[i] = nearestPaletteIndex(lab, palette);
     }
   }
 
   return { indices, width, height };
-}
-
-function diffuse(work, width, height, x, y, errR, errG, errB) {
-  const targets = [
-    [x + 1, y, 7 / 16],
-    [x - 1, y + 1, 3 / 16],
-    [x, y + 1, 5 / 16],
-    [x + 1, y + 1, 1 / 16],
-  ];
-  for (const [tx, ty, factor] of targets) {
-    if (tx < 0 || tx >= width || ty >= height) continue;
-    const ti = (ty * width + tx) * 3;
-    work[ti] += errR * factor;
-    work[ti + 1] += errG * factor;
-    work[ti + 2] += errB * factor;
-  }
 }

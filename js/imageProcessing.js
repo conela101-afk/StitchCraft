@@ -2,6 +2,8 @@
 // and colour-threshold background removal. All functions operate on and
 // return ImageData / canvases; nothing ever leaves the device.
 
+import { rgbToLab, ciede2000 } from './colorMath.js';
+
 export function loadImageFromFile(file) {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
@@ -111,17 +113,19 @@ export function applyEdgeEnhancement(imageData, amount = 0.5) {
 
 // Colour-threshold "click to remove" background: flood-fills from the
 // clicked pixel, removing (alpha=0) any connected pixel within `tolerance`
-// colour distance of the seed colour. Not full segmentation, just a simple
-// magic-wand.
-export function removeBackgroundByClick(imageData, seedX, seedY, tolerance = 32) {
+// perceptual colour distance (CIEDE2000, same metric used everywhere else
+// in this app for "does this look like the same colour") of the seed
+// colour. Not full segmentation, just a simple magic-wand — call it more
+// than once (see state.bgClicks in app.js) to clear an uneven background.
+export function removeBackgroundByClick(imageData, seedX, seedY, tolerance = 15) {
   const { width, height, data } = imageData;
   const idx = (x, y) => (y * width + x) * 4;
   const seedI = idx(seedX, seedY);
-  const seed = [data[seedI], data[seedI + 1], data[seedI + 2]];
+  const seedLab = rgbToLab([data[seedI], data[seedI + 1], data[seedI + 2]]);
 
+  const removed = new Uint8Array(width * height);
   const visited = new Uint8Array(width * height);
   const stack = [[seedX, seedY]];
-  const tol2 = tolerance * tolerance;
 
   while (stack.length) {
     const [x, y] = stack.pop();
@@ -131,13 +135,40 @@ export function removeBackgroundByClick(imageData, seedX, seedY, tolerance = 32)
     visited[p] = 1;
 
     const i = p * 4;
-    const dr = data[i] - seed[0];
-    const dg = data[i + 1] - seed[1];
-    const db = data[i + 2] - seed[2];
-    if (dr * dr + dg * dg + db * db > tol2) continue;
+    const lab = rgbToLab([data[i], data[i + 1], data[i + 2]]);
+    if (ciede2000(lab, seedLab) > tolerance) continue;
 
-    data[i + 3] = 0;
+    removed[p] = 1;
     stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+  }
+
+  // One erosion pass: a surviving pixel whose neighbourhood is mostly
+  // removed is almost always an anti-aliased edge or JPEG-block remnant of
+  // the background rather than part of the subject, so fold it in too —
+  // cleans up the jagged fringe a single-seed flood-fill otherwise leaves.
+  const eroded = new Uint8Array(removed);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const p = y * width + x;
+      if (removed[p]) continue;
+      let removedNeighbors = 0;
+      let total = 0;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          if (dx === 0 && dy === 0) continue;
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
+          total++;
+          if (removed[ny * width + nx]) removedNeighbors++;
+        }
+      }
+      if (total > 0 && removedNeighbors / total >= 0.5) eroded[p] = 1;
+    }
+  }
+
+  for (let p = 0; p < eroded.length; p++) {
+    if (eroded[p]) data[p * 4 + 3] = 0;
   }
   return imageData;
 }
