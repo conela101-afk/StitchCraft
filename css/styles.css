@@ -608,6 +608,8 @@ input[type="number"], input[type="text"], select {
   overflow: hidden;
 }
 .project-card .thumb-wrap canvas { max-width: 100%; max-height: 100%; }
+.project-card .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.project-card .thumb-wrap .thumb-placeholder { font-size: 1.5rem; color: var(--ink-muted); }
 .project-card .project-info { flex: 1; min-width: 0; }
 .project-card .pattern-name {
   font-weight: 600;
@@ -646,6 +648,21 @@ input[type="number"], input[type="text"], select {
 .status-pill.fo { background: #d7e6f4; color: #2a5c8a; }
 .status-pill.frogged { background: #f4d7d7; color: #8a2a2a; }
 .status-pill.gifted { background: #ecd7f4; color: #6a2a8a; }
+
+.project-name-input {
+  display: block;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-family: inherit;
+  color: inherit;
+}
+.project-name-input:focus { outline: 1px dashed var(--border); }
+.reference-photo { max-width: 100%; border-radius: 8px; display: block; }
 
 .status-choices {
   display: flex;

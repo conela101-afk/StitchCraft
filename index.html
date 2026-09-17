@@ -439,10 +439,37 @@
     <div id="projectsListPanel">
       <div class="card">
         <h2>Your projects</h2>
-        <p class="hint">Track stash, works-in-progress and finished objects. Open a saved pattern from the Library to start one.</p>
+        <p class="hint">Track stash, works-in-progress and finished objects. Open a saved pattern from the Library to start one, or log something you're not charting in-app below.</p>
+        <button class="btn btn-secondary btn-block" id="newProjectToggleBtn" type="button">+ New project</button>
+        <div id="newProjectForm" hidden>
+          <div class="field">
+            <label for="newProjectName">Name</label>
+            <input type="text" id="newProjectName" placeholder="e.g. Winter sampler kit" />
+          </div>
+          <div class="field">
+            <label for="newProjectPhoto">Reference photo (optional)</label>
+            <input type="file" id="newProjectPhoto" accept="image/*" />
+          </div>
+          <div class="field">
+            <label for="newProjectStatus">Status</label>
+            <select id="newProjectStatus">
+              <option value="stash" selected>Stash</option>
+              <option value="wip">WIP</option>
+              <option value="fo">FO</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="newProjectNotes">Notes (optional)</label>
+            <textarea id="newProjectNotes" placeholder="Kit details, source, plans…"></textarea>
+          </div>
+          <div class="export-row">
+            <button class="btn btn-primary" id="newProjectCreateBtn" type="button">Create project</button>
+            <button class="btn btn-ghost" id="newProjectCancelBtn" type="button">Cancel</button>
+          </div>
+        </div>
       </div>
       <div id="projectsEmpty" class="card" hidden>
-        <p class="hint" style="margin:0;">No projects yet. Save a pattern, then choose "Start a project from this pattern."</p>
+        <p class="hint" style="margin:0;">No projects yet. Save a pattern and choose "Start a project", or create a standalone project above.</p>
       </div>
       <div id="projectGroups"></div>
     </div>

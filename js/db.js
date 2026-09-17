@@ -98,11 +98,18 @@ export async function saveProject(project) {
   const now = Date.now();
   const record = {
     id: project.id || uuid(),
+    // Left undefined (not null) for a patternless project, so it's
+    // naturally excluded from the patternId index without a schema change.
     patternId: project.patternId,
+    name: project.name,
+    referencePhoto: project.referencePhoto,
     status: project.status || 'stash',
     startDate: project.startDate ?? null,
     finishDate: project.finishDate ?? null,
     stitchedCells: project.stitchedCells || [],
+    // Fallback progress tracking for patternless projects, which have no
+    // stitch grid for the tap-to-mark chart to work from.
+    progress: project.progress,
     notes: project.notes || '',
     photos: project.photos || [],
     createdAt: project.createdAt || now,
