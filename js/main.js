@@ -6,6 +6,7 @@
 import { startRouter, onRoute } from './router.js';
 import { renderLibrary } from './views/library.js';
 import './views/projects.js'; // registers its own 'projects' route handler
+import './scan.js'; // registers its own 'scan' route handler
 import './designer.js'; // registers its own 'designer' route handler
 
 onRoute('library', renderLibrary);

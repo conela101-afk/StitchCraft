@@ -1,4 +1,4 @@
-// Import/export of the StitchCraft pattern JSON format — the common
+// Import/export of the StitchGrid pattern JSON format — the common
 // currency between the wizard, Library, Designer and Tracker.
 
 const FORMAT = 'stitchcraft-pattern';
@@ -61,7 +61,7 @@ export async function importPatternJSON(file) {
 
 function validatePatternShape(data) {
   if (!data || typeof data !== 'object') {
-    throw new Error('Not a StitchCraft pattern file.');
+    throw new Error('Not a StitchGrid pattern file.');
   }
   if (!Number.isInteger(data.width) || !Number.isInteger(data.height) || data.width <= 0 || data.height <= 0) {
     throw new Error('Pattern is missing a valid width/height.');

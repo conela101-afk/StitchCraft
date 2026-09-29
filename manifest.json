@@ -1,6 +1,6 @@
 {
-  "name": "StitchCraft",
-  "short_name": "StitchCraft",
+  "name": "StitchGrid",
+  "short_name": "StitchGrid",
   "description": "Turn a photo into a printable cross-stitch pattern with multi-brand thread matching, fully offline.",
   "start_url": "./index.html",
   "scope": "./",

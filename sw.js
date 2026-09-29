@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stitchcraft-v5';
+const CACHE_NAME = 'stitchgrid-v7';
 const APP_SHELL = [
   './',
   './index.html',
@@ -14,6 +14,8 @@ const APP_SHELL = [
   './js/pdfDigitize.js',
   './js/exportUtils.js',
   './js/designer.js',
+  './js/scan.js',
+  './js/scanCore.js',
   './js/colorMath.js',
   './js/threadData.js',
   './js/crosswalk.js',

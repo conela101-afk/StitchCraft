@@ -1,4 +1,4 @@
-# StitchCraft
+# StitchGrid
 
 A client-side, offline-installable PWA that turns a photo into a printable
 cross-stitch pattern, with perceptual (CIEDE2000) thread-colour matching
@@ -54,3 +54,7 @@ table here is built from DMC's own published RGB references. Cross-brand
 conversion is always computed at runtime as a nearest-perceptual match
 (CIEDE2000) against whichever brand's own colour list is selected — never a
 copied commercial conversion chart — and the UI flags an approximate match.
+
+## Scan a printed chart
+
+The **Scan** tab digitises a photo/scan of a printed chart (built for black & white symbol charts; coloured cells also work): mark the four grid corners → straighten → check the detected grid → read cells → assign a thread code to each symbol found → save. Cells are grouped by shape similarity, not OCR, so you type each symbol's thread code from the printed legend and can fix misreads by tapping cells. Code: `js/scanCore.js` (image maths) and `js/scan.js` (UI).
