@@ -736,3 +736,16 @@ textarea {
   font-size: 0.65rem;
   padding: 2px 4px;
 }
+
+/* Scan a printed chart */
+.scan-canvas-wrap { overflow: auto; max-height: 70vh; border: 1px solid var(--border); border-radius: 10px; margin: 10px 0; background: #fff; touch-action: none; }
+.scan-canvas-wrap canvas { display: block; max-width: 100%; }
+#scanChartCanvas { max-width: none; touch-action: manipulation; }
+.scan-class-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.scan-class { display: grid; grid-template-columns: 22px 44px 1fr; gap: 8px; align-items: center; padding: 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+.scan-class.active { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(47,111,109,0.25); }
+.scan-class canvas { width: 44px; height: 44px; border: 1px solid var(--border); background: #fff; image-rendering: pixelated; }
+.scan-class .scan-class-body { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-width: 0; }
+.scan-class input[type=text] { width: 7em; }
+.scan-class .scan-count { color: var(--ink-muted); font-size: 0.8rem; }
+.scan-swatch { display: inline-block; width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--border); vertical-align: middle; }

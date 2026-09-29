@@ -22,6 +22,7 @@
     <a href="#/home" data-route="home">Home</a>
     <a href="#/new-pattern" data-route="new-pattern">New Pattern</a>
     <a href="#/library" data-route="library">Library</a>
+    <a href="#/scan" data-route="scan">Scan</a>
     <a href="#/designer" data-route="designer">Designer</a>
     <a href="#/projects" data-route="projects">Projects</a>
   </nav>
@@ -36,6 +37,7 @@
       <p class="hint">Turn a photo into a cross-stitch pattern, design one by hand, or pick up where you left off.</p>
       <div class="home-actions">
         <a class="btn btn-primary btn-block" href="#/new-pattern">Start a new pattern from a photo</a>
+        <a class="btn btn-secondary btn-block" href="#/scan">Scan a printed chart</a>
         <a class="btn btn-secondary btn-block" href="#/designer">Design a pattern by hand</a>
         <a class="btn btn-secondary btn-block" href="#/library">Browse your pattern library</a>
         <a class="btn btn-secondary btn-block" href="#/projects">View your stitching projects</a>
@@ -430,6 +432,73 @@
           <button class="btn btn-secondary" id="designerExportJsonBtn">Export pattern (.json)</button>
           <button class="btn btn-secondary" id="designerExportOxsBtn">Export pattern (.oxs)</button>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCAN A PRINTED CHART -->
+  <section class="view" id="view-scan">
+    <div class="card" id="scanStartCard">
+      <h2>Scan a printed chart</h2>
+      <p class="hint">Photograph or scan a printed cross-stitch chart (black &amp; white symbols work best) and turn it into an editable pattern. Nothing leaves your device. Tips: flat page, even light, whole chart in frame, one page at a time.</p>
+      <div class="export-row">
+        <button class="btn btn-primary" id="scanPickBtn" type="button">Choose photo / scan</button>
+        <button class="btn btn-secondary" id="scanCameraBtn" type="button">Take photo</button>
+      </div>
+      <input type="file" id="scanFileInput" accept="image/*" hidden />
+      <input type="file" id="scanCameraInput" accept="image/*" capture="environment" hidden />
+    </div>
+
+    <div class="card" id="scanCornersCard" hidden>
+      <h2>1 · Mark the chart</h2>
+      <p class="hint">Drag the four corners onto the outer corners of the grid (just the grid — leave out the legend and margins).</p>
+      <div class="scan-canvas-wrap"><canvas id="scanCornersCanvas"></canvas></div>
+      <div class="export-row">
+        <button class="btn btn-primary" id="scanStraightenBtn" type="button">Straighten &amp; detect grid</button>
+      </div>
+    </div>
+
+    <div class="card" id="scanGridCard" hidden>
+      <h2>2 · Check the grid</h2>
+      <p class="hint" id="scanGridHint">The red grid should sit on the chart's cells. Adjust the counts until it lines up.</p>
+      <div class="scan-canvas-wrap"><canvas id="scanGridCanvas"></canvas></div>
+      <div class="grid-2">
+        <div class="field"><label for="scanCols">Columns (stitches wide)</label><input type="number" id="scanCols" min="1" max="400" value="30" /></div>
+        <div class="field"><label for="scanRows">Rows (stitches high)</label><input type="number" id="scanRows" min="1" max="400" value="30" /></div>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label for="scanMode">Chart type</label>
+          <select id="scanMode"><option value="symbols" selected>Black &amp; white symbols</option><option value="colors">Coloured cells</option></select></div>
+        <div class="field"><label for="scanMaxClasses">Max symbols / colours</label><input type="number" id="scanMaxClasses" min="2" max="60" value="30" /></div>
+      </div>
+      <div class="field"><label for="scanSensitivity">Symbol separation <output id="scanSensitivityOut">35</output>%</label>
+        <input type="range" id="scanSensitivity" min="0" max="100" value="35" />
+        <p class="hint">Raise it if different symbols are being lumped together; lower it if one symbol is being split into several.</p></div>
+      <div class="field" id="scanWhiteField" hidden><label><input type="checkbox" id="scanWhiteBlank" checked /> Treat white cells as empty</label></div>
+      <div class="export-row">
+        <button class="btn btn-primary" id="scanReadBtn" type="button">Read chart</button>
+        <button class="btn btn-secondary" id="scanRecropBtn" type="button">Re-mark corners</button>
+      </div>
+    </div>
+
+    <div class="card" id="scanReviewCard" hidden>
+      <h2>3 · Review &amp; assign threads</h2>
+      <p class="hint">Each row is one symbol the scan found. Enter its thread code from the printed legend. To fix a mistake, pick a row (or Empty) then tap cells in the chart. Merge rows the scan wrongly split.</p>
+      <div class="field"><label for="scanBrand">Thread brand</label><select id="scanBrand"></select></div>
+      <datalist id="scanCodes"></datalist>
+      <div id="scanClassList" class="scan-class-list"></div>
+      <div class="scan-canvas-wrap"><canvas id="scanChartCanvas"></canvas></div>
+      <div class="chart-toggle" role="group">
+        <button type="button" id="scanViewSymbol" class="active">Symbols</button>
+        <button type="button" id="scanViewColor">Colours</button>
+      </div>
+      <div class="field"><label for="scanName">Pattern name</label><input type="text" id="scanName" value="Scanned pattern" /></div>
+      <div class="field"><label for="scanAida">Aida count</label>
+        <select id="scanAida"><option value="11">11 count</option><option value="14" selected>14 count</option><option value="16">16 count</option><option value="18">18 count</option><option value="22">22 count</option></select></div>
+      <div class="export-row">
+        <button class="btn btn-primary" id="scanSaveBtn" type="button">Save to library</button>
+        <button class="btn btn-secondary" id="scanProjectBtn" type="button">Start project</button>
+        <button class="btn btn-secondary" id="scanJsonBtn" type="button">Export JSON</button>
       </div>
     </div>
   </section>
