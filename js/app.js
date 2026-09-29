@@ -692,19 +692,19 @@ $('startProjectBtn').addEventListener('click', async () => {
 
 $('exportJsonBtn').addEventListener('click', () => {
   if (!state.pattern) return;
-  downloadBlob(exportPatternJSON(wizardPatternRecord()), 'stitchcraft-pattern.json');
+  downloadBlob(exportPatternJSON(wizardPatternRecord()), 'stitchgrid-pattern.json');
 });
 
 $('exportOxsBtn').addEventListener('click', () => {
   if (!state.pattern) return;
-  downloadBlob(exportPatternOXS(wizardPatternRecord()), 'stitchcraft-pattern.oxs');
+  downloadBlob(exportPatternOXS(wizardPatternRecord()), 'stitchgrid-pattern.oxs');
 });
 
 $('exportPngBtn').addEventListener('click', async () => {
   if (!state.pattern) return;
   const canvas = state.chartView === 'symbol' ? renderSymbolChart(state.pattern, 24) : renderColorChart(state.pattern, 24);
   const blob = await canvasToPngBlob(canvas);
-  downloadBlob(blob, 'stitchcraft-pattern.png');
+  downloadBlob(blob, 'stitchgrid-pattern.png');
 });
 
 $('exportPdfBtn').addEventListener('click', async () => {
@@ -712,9 +712,9 @@ $('exportPdfBtn').addEventListener('click', async () => {
   showToast('Building PDF…', 60000);
   try {
     const chartCanvasBig = state.chartView === 'symbol' ? renderSymbolChart(state.pattern, 24) : renderColorChart(state.pattern, 24);
-    const page1 = composeTitledPage(chartCanvasBig, 'StitchCraft Pattern — Chart');
+    const page1 = composeTitledPage(chartCanvasBig, 'StitchGrid Pattern — Chart');
     const meta = {
-      title: 'StitchCraft Pattern — Floss Legend',
+      title: 'StitchGrid Pattern — Floss Legend',
       widthStitches: state.pattern.width,
       heightStitches: state.pattern.height,
       aidaCount: settings.aidaCount,
@@ -725,7 +725,7 @@ $('exportPdfBtn').addEventListener('click', async () => {
     };
     const page2 = renderLegendCanvas(state.legend, meta, settings.brand);
     const blob = await canvasesToPdf([page1, page2], { pageWidthIn: 8.5, pageHeightIn: 11 });
-    downloadBlob(blob, 'stitchcraft-pattern.pdf');
+    downloadBlob(blob, 'stitchgrid-pattern.pdf');
   } finally {
     hideToast();
   }

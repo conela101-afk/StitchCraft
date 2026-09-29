@@ -25,7 +25,7 @@
 //
 // Coordinates are 0-based. palindex 0 conventionally means "cloth"
 // (background/unstitched) and is never referenced by a <stitch>.
-// StitchCraft only reads/writes full stitches — backstitch, French knots,
+// StitchGrid only reads/writes full stitches — backstitch, French knots,
 // half/quarter stitches aren't part of this app's Pattern model, so an
 // imported file's backstitches etc. are dropped silently, and export always
 // writes an empty <backstitches/>.
@@ -40,7 +40,7 @@ function xmlEscape(s) {
 
 export function exportPatternOXS(pattern) {
   const brandKey = pattern.brand || 'DMC';
-  const name = pattern.name || 'StitchCraft pattern';
+  const name = pattern.name || 'StitchGrid pattern';
   const aida = pattern.aidaCount || 14;
 
   const paletteXml = pattern.colors
@@ -62,8 +62,8 @@ export function exportPatternOXS(pattern) {
 
   const xml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <chart>
-  <format comments01="Exported from StitchCraft"/>
-  <properties oxsversion="1.0" software="StitchCraft" chartwidth="${pattern.width}" chartheight="${pattern.height}" charttitle="${xmlEscape(name)}" author="" stitchesperinch="${aida}" stitchesperinch_y="${aida}" palettecount="${pattern.colors.length + 1}"/>
+  <format comments01="Exported from StitchGrid"/>
+  <properties oxsversion="1.0" software="StitchGrid" chartwidth="${pattern.width}" chartheight="${pattern.height}" charttitle="${xmlEscape(name)}" author="" stitchesperinch="${aida}" stitchesperinch_y="${aida}" palettecount="${pattern.colors.length + 1}"/>
   <palette>
     <palette_item index="0" number="cloth" name="cloth" color="FFFFFF"/>
 ${paletteXml}

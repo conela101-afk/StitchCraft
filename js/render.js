@@ -87,7 +87,7 @@ export function renderLegendCanvas(legend, meta, brandKey) {
   ctx.fillRect(0, 0, width, height);
   ctx.fillStyle = '#111111';
   ctx.font = 'bold 20px sans-serif';
-  ctx.fillText(meta.title || 'StitchCraft Pattern', 20, 32);
+  ctx.fillText(meta.title || 'StitchGrid Pattern', 20, 32);
   ctx.font = '13px sans-serif';
   ctx.fillStyle = '#444444';
   ctx.fillText(

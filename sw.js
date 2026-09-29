@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stitchcraft-v5';
+const CACHE_NAME = 'stitchgrid-v6';
 const APP_SHELL = [
   './',
   './index.html',

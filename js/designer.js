@@ -583,7 +583,7 @@ exportPngBtn.addEventListener('click', async () => {
 
 exportPdfBtn.addEventListener('click', async () => {
   const chartBig = chartView === 'symbol' ? renderSymbolChart(livePattern(), 24) : renderColorChart(livePattern(), 24);
-  const page1 = composeTitledPage(chartBig, nameInput.value || 'StitchCraft Pattern');
+  const page1 = composeTitledPage(chartBig, nameInput.value || 'StitchGrid Pattern');
   const legend = buildLegend(livePattern(), brandKey);
   const meta = {
     title: `${nameInput.value} — Floss Legend`,

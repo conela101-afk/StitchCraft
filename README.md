@@ -1,4 +1,4 @@
-# StitchCraft
+# StitchGrid
 
 A client-side, offline-installable PWA that turns a photo into a printable
 cross-stitch pattern, with perceptual (CIEDE2000) thread-colour matching
